@@ -69,10 +69,16 @@ class _TelaInicialState extends State<TelaInicial> {
 
     // try/catch: tenta executar o bloco e captura erros, se ocorrerem
     try {
+      // Simulação de erro
+      if (codigo == 999) {
+        throw Exception('Isto é uma falha simulada');
+      }
+
       // Envia os dados para o BD
       // "await" espera o banco terminar antes de seguir para a próxima linha
       await banco.cadastrar(nome.text, email.text);
 
+      id.clear(); // Limpa o campo id.
       nome.clear(); // Limpa o campo nome.
       email.clear(); // Limpa o campo e-mail.
 
