@@ -1,0 +1,72 @@
+Em Flutter, `child` e `children` são parâmetros de widgets. A diferença é simples: **quantos widgets filhos** o widget pai aceita.
+
+* `child` (singular)
+
+Recebe **um único widget**. É usado em widgets que envolvem ou decoram apenas um elemento.
+
+```dart
+Container(
+  padding: EdgeInsets.all(16),
+  child: Text('Olá, mundo!'),
+)
+```
+
+Widgets comuns que usam `child`: `Container`, `Padding`, `Center`, `Align`, `SizedBox`, `Card`, `Expanded`, `Flexible`, `GestureDetector`, `SafeArea`, `ElevatedButton`.
+
+* `children` (plural)
+
+Recebe uma **lista de widgets** (`List<Widget>`). É usado em widgets de layout que organizam vários elementos.
+
+```dart
+Column(
+  children: [
+    Text('Primeiro'),
+    Text('Segundo'),
+    Text('Terceiro'),
+  ],
+)
+```
+
+Widgets comuns que usam `children`: `Column`, `Row`, `Stack`, `ListView`, `Wrap`, `Flex`, `GridView`.
+
+* Resumo
+
+| | `child` | `children` |
+|---|---|---|
+| Tipo | `Widget` | `List<Widget>` |
+| Quantidade | Um widget | Vários widgets |
+| Sintaxe | `child: Text('A')` | `children: [Text('A'), Text('B')]` |
+| Uso típico | Decorar/envolver um widget | Organizar múltiplos widgets |
+
+* Combinando os dois
+
+É comum usar os dois juntos: um widget com `child` envolvendo um widget com `children`.
+
+```dart
+Padding(
+  padding: EdgeInsets.all(8),
+  child: Column(
+    children: [
+      Text('Título'),
+      Text('Subtítulo'),
+    ],
+  ),
+)
+```
+
+* Dica importante
+
+Se você precisa colocar vários widgets em um lugar que aceita apenas `child`, envolva-os em um `Column`, `Row` ou `Stack`:
+
+```dart
+Container(
+  child: Column(
+    children: [
+      Icon(Icons.star),
+      Text('Favorito'),
+    ],
+  ),
+)
+```
+
+Existem também variações como `ListView.builder`, que não recebe `children` diretamente, mas usa `itemBuilder` para construir os filhos sob demanda, o que é mais eficiente para listas longas.

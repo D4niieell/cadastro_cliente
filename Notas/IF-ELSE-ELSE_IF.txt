@@ -1,0 +1,263 @@
+* Estruturas de controle e tratamento de erros em Dart
+
+Suas anotações cobrem dois grandes assuntos: **decisões** (`if`, `else`, `else if`, `switch`) e **tratamento de exceções** (`try`, `catch`, `finally`).
+
+---
+
+* 1. Estruturas de decisão
+
+Elas permitem que o programa **escolha qual caminho seguir** com base em uma condição. A condição precisa resultar em um valor `bool` (`true` ou `false`).
+
+* `if`
+Executa um bloco **somente se** a condição for verdadeira.
+
+```dart
+void main() {
+  int idade = 20;
+
+  if (idade >= 18) {
+    print('Maior de idade');
+  }
+}
+```
+
+* `else`
+É o "caso contrário": roda quando o `if` é falso.
+
+```dart
+void main() {
+  int idade = 15;
+
+  if (idade >= 18) {
+    print('Maior de idade');
+  } else {
+    print('Menor de idade');
+  }
+}
+```
+
+* `else if`
+Permite testar **várias condições em sequência**. O Dart avalia de cima para baixo e executa apenas o **primeiro bloco** cuja condição for verdadeira; os demais são ignorados.
+
+```dart
+void main() {
+  int nota = 7;
+
+  if (nota >= 9) {
+    print('Excelente');
+  } else if (nota >= 7) {
+    print('Bom');
+  } else if (nota >= 5) {
+    print('Regular');
+  } else {
+    print('Reprovado');
+  }
+}
+```
+
+Aqui, com `nota = 7`, a saída é **Bom**. As condições seguintes nem são testadas.
+
+> **Dica:** a ordem importa. Se você colocasse `nota >= 5` primeiro, uma nota 9 cairia nele e nunca chegaria em "Excelente".
+
+Você pode combinar condições com operadores lógicos:
+
+- `&&` (E): ambas precisam ser verdadeiras
+- `||` (OU): basta uma ser verdadeira
+- `!` (NÃO): inverte o valor
+
+```dart
+if (idade >= 18 && temCarteira) {
+  print('Pode dirigir');
+}
+```
+
+---
+
+* 2. `switch`
+
+O `switch` compara **uma variável com vários valores possíveis**. É uma alternativa mais organizada ao `else if` quando você testa a mesma variável contra valores exatos.
+
+```dart
+void main() {
+  int dia = 3;
+
+  switch (dia) {
+    case 1:
+      print('Domingo');
+      break;
+    case 2:
+      print('Segunda-feira');
+      break;
+    case 3:
+      print('Terça-feira');
+      break;
+    default:
+      print('Dia inválido');
+  }
+}
+```
+
+**Como funciona:**
+- `case`: cada valor possível a ser comparado.
+- `break`: encerra o `switch`. Em versões anteriores ao Dart 3, esquecer o `break` causava erro. No Dart 3 ele passou a ser opcional, pois o `case` já não "vaza" para o próximo.
+- `default`: executa se nenhum `case` combinar. Funciona como o `else`.
+
+**Agrupando casos** (vários valores, mesmo resultado):
+
+```dart
+switch (dia) {
+  case 1:
+  case 7:
+    print('Fim de semana');
+  case 2:
+  case 3:
+  case 4:
+  case 5:
+  case 6:
+    print('Dia útil');
+}
+```
+
+**Switch expression (Dart 3+):** uma forma mais enxuta, que *retorna um valor*:
+
+```dart
+String nome = switch (dia) {
+  1 => 'Domingo',
+  2 => 'Segunda-feira',
+  3 => 'Terça-feira',
+  _ => 'Dia inválido', // o "_" faz o papel do default
+};
+```
+
+* Quando usar cada um?
+
+| Situação | Melhor escolha |
+|---|---|
+| Condições com comparações (`>`, `<`, `&&`, `||`) | `if / else if` |
+| Uma variável contra valores exatos | `switch` |
+| Apenas duas opções | `if / else` |
+
+---
+
+* 3. Tratamento de exceções: `try`, `catch`, `finally`
+
+Uma **exceção** é um erro que acontece **durante a execução** do programa (por exemplo, converter texto em número, dividir por zero, acessar um arquivo que não existe). Sem tratamento, o programa **quebra e é encerrado**. O tratamento de exceções permite reagir ao erro de forma controlada.
+
+* `try` (tentar)
+Contém o código **que pode dar erro**. Você diz ao Dart: "tente executar isto".
+
+* `catch` (capturar)
+Se algo der errado dentro do `try`, a execução **salta imediatamente** para o `catch`. O parâmetro (`erro`) guarda informações sobre o que aconteceu.
+
+* `finally` (finalmente)
+Executa **sempre**, dando erro ou não. Ele serve para tarefas de "limpeza" ou finalização, como fechar uma conexão, um arquivo ou esconder um indicador de carregamento. Sua anotação "eu executo o código abaixo..." resume bem a ideia: *aconteça o que acontecer, eu rodo*.
+
+* Analisando seu exemplo
+
+```dart
+void main() {
+  try {
+    int numero = int.parse('abc');
+  } catch (erro) {
+    print('Erro ao converter o número');
+  } finally {
+    print('Operação finalizada');
+  }
+}
+```
+
+**Passo a passo:**
+1. O Dart entra no `try` e tenta converter `'abc'` em inteiro com `int.parse`.
+2. `'abc'` não é um número, então o Dart **lança uma exceção** (`FormatException`).
+3. A execução do `try` é interrompida e vai para o `catch`, que imprime `Erro ao converter o número`.
+4. Por fim, o `finally` executa e imprime `Operação finalizada`.
+
+**Saída:**
+```
+Erro ao converter o número
+Operação finalizada
+```
+
+Se o texto fosse válido, como `int.parse('123')`, o `catch` seria **pulado**, mas o `finally` ainda rodaria:
+
+```
+Operação finalizada
+```
+
+* Vendo o erro real
+
+Você pode usar a variável do `catch` para mostrar o que aconteceu:
+
+```dart
+try {
+  int numero = int.parse('abc');
+} catch (erro) {
+  print('Erro: $erro');
+}
+// Erro: FormatException: Invalid radix-10 number (at character 1)
+```
+
+* Capturando tipos específicos com `on`
+
+Dá para tratar cada tipo de erro de um jeito:
+
+```dart
+try {
+  int numero = int.parse('abc');
+} on FormatException {
+  print('O texto não é um número válido');
+} catch (erro) {
+  print('Outro erro: $erro'); // captura qualquer outra exceção
+} finally {
+  print('Operação finalizada');
+}
+```
+
+- `on Tipo`: captura **apenas** aquele tipo de exceção.
+- `catch`: captura **qualquer** exceção que sobrar.
+- A ordem importa: coloque os `on` mais específicos primeiro e o `catch` genérico por último.
+
+* Pegando também o rastro do erro (stack trace)
+
+```dart
+catch (erro, stackTrace) {
+  print('Erro: $erro');
+  print('Onde ocorreu: $stackTrace');
+}
+```
+
+* Lançando suas próprias exceções com `throw`
+
+```dart
+void sacar(double saldo, double valor) {
+  if (valor > saldo) {
+    throw Exception('Saldo insuficiente');
+  }
+  print('Saque realizado');
+}
+
+void main() {
+  try {
+    sacar(100, 150);
+  } catch (erro) {
+    print(erro); // Exception: Saldo insuficiente
+  }
+}
+```
+
+---
+
+* Resumo rápido
+
+| Palavra-chave | Função |
+|---|---|
+| `if` | Executa se a condição for verdadeira |
+| `else if` | Testa outra condição se as anteriores falharam |
+| `else` | Executa se nenhuma condição anterior foi verdadeira |
+| `switch` | Compara uma variável com vários valores exatos |
+| `try` | Tenta executar código que pode falhar |
+| `catch` | Captura a exceção e trata o erro |
+| `on` | Captura um tipo específico de exceção |
+| `finally` | Executa sempre, com ou sem erro |
+| `throw` | Lança uma exceção manualmente |
+

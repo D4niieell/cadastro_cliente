@@ -1,0 +1,90 @@
+* StatelessWidget vs StatefulWidget (Flutter)
+
+* Resumo
+
+**StatelessWidget** é um widget **imutável**: depois de construído, sua aparência depende apenas dos dados que ele recebe (parâmetros do construtor). Ele não guarda nenhum estado interno que mude ao longo do tempo.
+
+**StatefulWidget** é um widget que **mantém estado mutável**. Quando esse estado muda, a interface é reconstruída para refletir a mudança.
+
+* Comparação
+
+| Aspecto | StatelessWidget | StatefulWidget |
+|---|---|---|
+| Estado interno | Não tem | Tem (na classe `State`) |
+| Estrutura | 1 classe | 2 classes (widget + `State`) |
+| Atualização da UI | Só se o pai o reconstruir com novos dados | Pode se redesenhar sozinho com `setState()` |
+| Ciclo de vida | Apenas `build()` | `initState()`, `didUpdateWidget()`, `dispose()`, etc. |
+| Desempenho | Mais leve | Um pouco mais pesado |
+| Uso típico | Textos, ícones, layouts fixos | Formulários, contadores, animações, checkboxes |
+
+* StatelessWidget
+
+```dart
+class Saudacao extends StatelessWidget {
+  final String nome;
+
+  const Saudacao({super.key, required this.nome});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text('Olá, $nome!');
+  }
+}
+```
+
+O texto só muda se quem usa `Saudacao` passar outro valor para `nome`.
+
+* StatefulWidget
+
+```dart
+class Contador extends StatefulWidget {
+  const Contador({super.key});
+
+  @override
+  State<Contador> createState() => _ContadorState();
+}
+
+class _ContadorState extends State<Contador> {
+  int _contagem = 0;
+
+  void _incrementar() {
+    setState(() {
+      _contagem++;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: _incrementar,
+      child: Text('Cliques: $_contagem'),
+    );
+  }
+}
+```
+
+Aqui, `_contagem` vive na classe `State`. Ao chamar `setState()`, o Flutter executa `build()` novamente e atualiza a tela.
+
+* Por que duas classes no StatefulWidget?
+
+O **widget** em si é imutável e pode ser recriado várias vezes pelo Flutter. Já o objeto **State** é **persistente**: sobrevive às reconstruções do widget, e é por isso que o valor de `_contagem` não é perdido.
+
+* Ciclo de vida do State
+
+1. `createState()`: cria o objeto State
+2. `initState()`: chamado uma vez; ideal para inicializações
+3. `build()`: constrói a UI (chamado sempre que o estado muda)
+4. `didUpdateWidget()`: quando o widget pai fornece novos parâmetros
+5. `dispose()`: libera recursos (controllers, streams, listeners)
+
+* Quando usar cada um?
+
+- Use **StatelessWidget** quando a UI depende apenas dos parâmetros recebidos.
+- Use **StatefulWidget** quando a UI precisa mudar por conta de interação do usuário, dados assíncronos, animações ou timers.
+
+* Dicas
+
+- Prefira Stateless sempre que possível; é mais simples e eficiente.
+- Mantenha o estado o mais "baixo" possível na árvore de widgets, para que menos partes da tela sejam reconstruídas.
+- Para estado compartilhado entre muitos widgets, considere soluções de gerenciamento de estado como **Provider**, **Riverpod** ou **Bloc**, em vez de passar tudo via `setState()`.
+

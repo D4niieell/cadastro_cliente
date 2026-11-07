@@ -1,0 +1,84 @@
+// Importa a biblioteca do SQLite para Flutter (openDatabase, Database, etc.)
+import 'package:sqflite/sqflite.dart'; // Biblioteca  do SQLite
+// Importa utilitários para manipular caminhos de arquivos (função join)
+import 'package:path/path.dart'; // Manipula caminho
+
+// Classe responsável por gerenciar o banco de dados local
+class BancoLocal {
+  Database? banco; // Guardando a conexão com BD
+  // Método assíncrono que abre (ou reaproveita) a conexão com o banco
+  Future<Database> abrirBanco() async {
+    // Reutiliza a conexão se o banco já estiver aberto.
+    // Verifica se a variável não é nula E se a conexão ainda está aberta
+    if (banco != null && banco!.isOpen) {
+      // Retorna a conexão existente (o "!" garante que não é nula)
+      return banco!;
+    }
+
+    String pasta = await getDatabasesPath(); // Pasta do banco de dados
+    String arquivo = join(pasta, 'cadastro.db'); // Nome e local do arquivo
+
+    // Abre o banco (cria o arquivo se não existir) e guarda a conexão na variável
+    banco = await openDatabase(
+      arquivo, // Caminho completo do BD
+      version: 1, // Versão inicial do BD
+      // Executado apenas na primeira vez, quando o banco é criado
+      onCreate: (db, version) async {
+        // Executa o comando SQL para criar a tabela de usuários
+        await db.execute('''CREATE TABLE usuarios (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          nome TEXT NOT NULL,
+          email TEXT NOT NULL UNIQUE
+          );''');
+      },
+    );
+    return banco!; // Retorna a conexão aberta
+  }
+
+  // Cadastro de um novo usuário
+  Future<void> cadastrar(String nome, String email) async {
+    // Obtém a conexão com o banco (abrindo-o, se necessário)
+    final db = await abrirBanco();
+    // Insere uma nova linha na tabela 'usuarios' usando um Map (coluna: valor)
+    await db.insert('usuarios', {'nome': nome, 'email': email});
+  }
+
+  // Consulta de todos os usuários cadastrados
+  // Future<List<Map<String, Object?>>> listar() async {
+  // Método assíncrono que retorna uma lista com os registros encontrados
+  Future<List> listar() async {
+    // Obtém a conexão com o banco (abrindo-o, se necessário)
+    final db = await abrirBanco();
+    // Busca todas as linhas da tabela 'usuarios' (equivale a SELECT * FROM usuarios)
+    return await db.query('usuarios');
+  }
+
+  // ALtera o nome e o e-mail de um usuário
+  Future<int> alterar(int id, String nome, String email) async {
+
+    final db = await abrirBanco(); // Obtém o banco
+
+    return await db.update(
+      'usuarios', // Tabela que será alterada
+      {
+        'nome':nome, // Novo nome
+         'email': email // Novo e-mail
+      },
+       where: 'id = ?', // Condição WHERE
+        whereArgs: [id], // Valor utilizado na condição
+    );
+  }
+
+  // Exclui um usuário pelo ID
+  Future<int> excluir(int id) async {
+
+    final db = await abrirBanco(); // Obtém o banco
+
+    return await db.delete(
+      'usuarios', // Tabela utilizada
+      where: 'id = ?', // Condição WHERE
+      whereArgs: [id], // ID do
+      );
+    }
+  }
+}

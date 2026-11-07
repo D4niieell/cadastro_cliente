@@ -1,0 +1,222 @@
+* Explicação detalhada do código Flutter (app contador)
+
+Este é o projeto padrão que o Flutter gera quando você cria um app novo (`flutter create`). Ele é um contador: toda vez que você toca no botão **+**, o número na tela aumenta em 1. Vou explicar de cima para baixo.
+
+---
+
+* 1. Importação
+
+```dart
+import 'package:flutter/material.dart';
+```
+
+Importa a biblioteca **Material Design** do Flutter. Ela traz os widgets prontos (`Scaffold`, `AppBar`, `Text`, `FloatingActionButton`, etc.) e o sistema de temas. Quase todo app Flutter começa com essa linha.
+
+---
+
+* 2. O ponto de entrada: `main()`
+
+```dart
+void main() {
+  runApp(const MyApp());
+}
+```
+
+- `main()` é a primeira função executada, como em qualquer programa Dart.
+- `runApp()` pega o widget que você passa e o coloca como a **raiz da árvore de widgets**, ou seja, o que será desenhado na tela.
+- `const` indica que o objeto é criado em tempo de compilação, o que economiza memória e melhora a performance, porque o Flutter pode reutilizá-lo.
+
+---
+
+* 3. A classe `MyApp` (StatelessWidget)
+
+```dart
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+```
+
+Em Flutter, **tudo é widget**. Existem dois tipos principais:
+
+| Tipo | Característica |
+|---|---|
+| `StatelessWidget` | Não tem estado mutável. Sempre desenha a mesma coisa para as mesmas configurações. |
+| `StatefulWidget` | Tem estado que muda com o tempo, e a tela se redesenha quando isso acontece. |
+
+`MyApp` é *stateless* porque ela só configura o app (tema, título, tela inicial), e isso não muda durante o uso.
+
+`{super.key}` é o parâmetro opcional `key`, repassado para a classe-mãe. Ele ajuda o Flutter a identificar widgets na árvore.
+
+* O método `build`
+
+```dart
+@override
+Widget build(BuildContext context) {
+  return MaterialApp(
+    title: 'Flutter Demo',
+    theme: ThemeData(
+      colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+    ),
+    home: const MyHomePage(title: 'Flutter Demo Home Page'),
+  );
+}
+```
+
+O `build` é o método que **descreve a interface**. Ele retorna uma árvore de widgets.
+
+- **`MaterialApp`**: widget que configura um app no estilo Material Design (navegação, tema, localização, etc.).
+- **`title`**: nome do app, usado pelo sistema operacional (por exemplo, na lista de apps recentes).
+- **`theme`**: define a aparência global.
+  - `ThemeData` guarda cores, fontes e estilos.
+  - `ColorScheme.fromSeed(seedColor: Colors.deepPurple)` gera uma **paleta inteira de cores** harmônicas a partir de uma única cor "semente" (roxo-escuro). É o padrão do Material 3.
+  - O `.fromSeed(...)` sem o nome da classe usa a sintaxe de **dot shorthand** (atalho com ponto), recurso mais novo do Dart, em que o tipo é inferido pelo contexto. Nas versões anteriores você escreveria `ColorScheme.fromSeed(...)`. O mesmo vale para `mainAxisAlignment: .center`, que equivale a `MainAxisAlignment.center`.
+- **`home`**: a primeira tela exibida, aqui `MyHomePage`, que recebe um título.
+
+Os comentários longos no código são dicas do template, ensinando sobre **hot reload** (recarregar o código sem perder o estado) e **hot restart** (reiniciar zerando o estado).
+
+---
+
+* 4. A classe `MyHomePage` (StatefulWidget)
+
+```dart
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key, required this.title});
+
+  final String title;
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+```
+
+Esta é a tela principal. Ela é *stateful* porque o contador muda.
+
+Um `StatefulWidget` é dividido em **duas classes**:
+
+1. **O widget** (`MyHomePage`): é imutável e guarda apenas a **configuração**. Aqui, o `title`, que vem de quem criou o widget. Por isso o campo é `final`.
+2. **O State** (`_MyHomePageState`): guarda os **dados mutáveis** e contém o `build`.
+
+O método `createState()` é a ligação entre as duas. O Flutter o chama para criar o objeto de estado.
+
+`required this.title` significa que o parâmetro é obrigatório.
+
+O `_` antes de `_MyHomePageState` torna a classe **privada ao arquivo** (convenção do Dart).
+
+---
+
+* 5. A classe de estado `_MyHomePageState`
+
+```dart
+class _MyHomePageState extends State<MyHomePage> {
+  int _counter = 0;
+```
+
+Aqui mora o dado que muda: `_counter`, começando em 0. O `_` o deixa privado.
+
+### A função que incrementa
+
+```dart
+void _incrementCounter() {
+  setState(() {
+    _counter++;
+  });
+}
+```
+
+Este é o **conceito mais importante** do código.
+
+- `_counter++` soma 1 ao valor.
+- `setState(...)` **avisa o Flutter que o estado mudou**, e ele então executa o `build` de novo para atualizar a tela.
+
+Se você escrevesse apenas `_counter++` sem o `setState`, a variável mudaria, mas **a tela não seria atualizada**, porque o Flutter não saberia que precisa redesenhar.
+
+---
+
+* 6. O `build` da tela
+
+```dart
+return Scaffold(
+  appBar: AppBar(...),
+  body: Center(...),
+  floatingActionButton: FloatingActionButton(...),
+);
+```
+
+* `Scaffold`
+É a **estrutura básica de uma tela Material**. Ele organiza áreas como barra superior, corpo, botão flutuante, menu lateral e barra inferior. Aqui usa três delas.
+
+* `AppBar` (barra superior)
+
+```dart
+appBar: AppBar(
+  backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+  title: Text(widget.title),
+),
+```
+
+- `Theme.of(context)` busca o tema definido lá no `MaterialApp`. Assim você usa as cores do tema em vez de valores fixos.
+- `inversePrimary` é uma cor derivada do esquema de cores, que dá o tom roxo-claro da barra.
+- `widget.title` acessa o `title` do widget `MyHomePage` de dentro da classe `State`. É assim que o State "enxerga" a configuração do widget.
+
+* `body` com `Center` e `Column`
+
+```dart
+body: Center(
+  child: Column(
+    mainAxisAlignment: .center,
+    children: [
+      const Text('You have pushed the button this many times:'),
+      Text(
+        '$_counter',
+        style: Theme.of(context).textTheme.headlineMedium,
+      ),
+    ],
+  ),
+),
+```
+
+- **`Center`**: centraliza o filho no espaço disponível.
+- **`Column`**: empilha os filhos **na vertical**.
+  - O *eixo principal* (main axis) da `Column` é o vertical, e o *eixo cruzado* (cross axis) é o horizontal.
+  - `mainAxisAlignment: .center` centraliza os itens verticalmente.
+- Os dois **`Text`**:
+  1. Um texto fixo (por isso `const`): "You have pushed the button this many times:".
+  2. O valor do contador. `'$_counter'` é **interpolação de string**: o Dart insere o valor da variável no texto. O estilo `headlineMedium` vem do tema e deixa o número grande.
+
+* `FloatingActionButton` (botão flutuante)
+
+```dart
+floatingActionButton: FloatingActionButton(
+  onPressed: _incrementCounter,
+  tooltip: 'Increment',
+  child: const Icon(Icons.add),
+),
+```
+
+- `onPressed`: função chamada ao tocar. Passamos `_incrementCounter` **sem parênteses**, ou seja, passamos a referência da função, e não o resultado de chamá-la.
+- `tooltip`: texto que aparece ao manter o dedo/mouse sobre o botão (também ajuda na acessibilidade).
+- `child`: o ícone de **+** (`Icons.add`).
+
+---
+
+* 7. O fluxo completo, passo a passo
+
+1. O app inicia em `main()` e chama `runApp(MyApp())`.
+2. `MyApp.build` cria o `MaterialApp` com o tema e define `MyHomePage` como tela inicial.
+3. `MyHomePage` cria seu `_MyHomePageState`, com `_counter = 0`.
+4. O `build` desenha a tela mostrando **0**.
+5. O usuário toca no botão **+**, e `_incrementCounter` é chamado.
+6. `setState` incrementa `_counter` para 1 e marca a tela como "suja".
+7. O Flutter executa o `build` novamente, e o texto agora mostra **1**.
+8. O ciclo se repete a cada toque.
+
+---
+
+* 8. Conceitos-chave para levar
+
+- **Tudo é widget**, e a interface é uma árvore de widgets aninhados.
+- **Stateless** é para telas que não mudam. **Stateful** é para telas com dados mutáveis.
+- **`setState`** é o que faz a interface reagir a mudanças.
+- **`build`** descreve a interface a partir do estado atual e é chamado várias vezes, então deve ser leve e sem efeitos colaterais.
+- **`const`** otimiza a performance ao reaproveitar widgets que nunca mudam.
+- **`Theme.of(context)`** permite usar cores e estilos centralizados, em vez de valores fixos.
+
