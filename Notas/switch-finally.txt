@@ -1,0 +1,19 @@
+if, else, else if
+switch
+
+try - Tentar, iniciar algo
+
+catch - Quando uma exceção é capturada o catch atua
+
+finally - eu executo o código abaixo...
+
+void main () {
+ 
+ try {
+    int numero = int.parse('abc');
+  } catch (erro) {
+     print('Erro ao converter o número');
+  } finally {
+     print('Operação finalizada');
+ }
+}

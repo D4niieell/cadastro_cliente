@@ -1,0 +1,12 @@
+MAP x OBJETO
+
+map: usuario = {'nome:' 'Ana', 'email': 'ana@email.com'} 
+
+- MAP - 
+print ({usuario['nome']}) = Ana 
+print ({usuario['email']}) = ana@email.com 
+
+- OBJETO -
+Depois de convertido o MAP em OBJETO
+print (usuario.nome) = Ana
+print (usuario.email) = ana@email.com
