@@ -14,7 +14,7 @@ class Usuario {
   // Converte o OBJETO em MAP
   // Método que retorna um Map com chave (String) e valor (Object?), formato usado pelo sqflite para inserir/atualizar
   Map<String, Object?> paraMap() {
-    // ➜ Retorna o Map com os campos nome e email; o id fica de fora para o SQLite gerá-lo (autoincremento)
+    // Retorna o Map com os campos nome e email; o id fica de fora para o SQLite gerá-lo (autoincremento)
     return {'nome': nome, 'email': email};
   }
 
@@ -23,13 +23,8 @@ class Usuario {
   static Usuario doMap(Map<String, Object> dados) {
     // Cria e retorna um novo objeto Usuario preenchido com os dados do Map
     return Usuario(
-      id:
-          dados['id']
-              as int, // Lê a chave 'id' do Map e converte (cast) para int
-      nome:
-          dados['nome']
-              as String, // Lê a chave 'nome' do Map e converte para String
-      email: dados['email'] as String,
-    ); // Lê a chave 'email' do Map e converte para String
+      id: dados['id'] as int, // Lê a chave 'id' do Map e converte (cast) para int
+      nome: dados['nome'] as String, // Lê a chave 'nome' do Map e converte para String
+      email: dados['email'] as String,); // Lê a chave 'email' do Map e converte para String
   }
 }
