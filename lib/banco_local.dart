@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart'; // Biblioteca do SQLite
 import 'package:path/path.dart'; // Manipula caminho
+
 import 'usuario.dart'; // Importa a classe Usuario
 
 class BancoLocal {
