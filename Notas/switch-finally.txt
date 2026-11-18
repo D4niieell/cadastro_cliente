@@ -1,19 +1,275 @@
-if, else, else if
-switch
+Estruturas de controle em Dart: condicionais e tratamento de erros
 
-try - Tentar, iniciar algo
+1. Condicionais: `if`, `else if`, `else`
 
-catch - Quando uma exceção é capturada o catch atua
+Servem para **tomar decisões**: o programa executa um bloco de código apenas se uma condição for verdadeira (`true`).
 
-finally - eu executo o código abaixo...
+```dart
+void main() {
+  int nota = 7;
 
-void main () {
- 
- try {
+  if (nota >= 9) {
+    print('Excelente!');
+  } else if (nota >= 7) {
+    print('Aprovado');
+  } else if (nota >= 5) {
+    print('Recuperação');
+  } else {
+    print('Reprovado');
+  }
+}
+```
+
+**Como funciona:**
+- `if`: testa a primeira condição.
+- `else if`: só é testado se os anteriores forem falsos. Pode haver quantos você quiser.
+- `else`: é o "caso contrário", executado quando nenhuma condição anterior foi verdadeira. É opcional.
+- Assim que uma condição é verdadeira, o Dart executa aquele bloco e **ignora o resto**.
+
+**Operadores úteis nas condições:**
+
+| Operador | Significado |
+|---|---|
+| `==` / `!=` | igual / diferente |
+| `>` `<` `>=` `<=` | comparações |
+| `&&` | E (as duas precisam ser verdadeiras) |
+| `\|\|` | OU (basta uma ser verdadeira) |
+| `!` | negação |
+
+```dart
+int idade = 20;
+bool temCarteira = true;
+
+if (idade >= 18 && temCarteira) {
+  print('Pode dirigir');
+}
+```
+
+**Operador ternário** (forma curta de um `if/else` simples):
+
+```dart
+String status = idade >= 18 ? 'Maior de idade' : 'Menor de idade';
+```
+
+---
+
+2. `switch`
+
+É uma alternativa ao `if/else if` quando você compara **uma mesma variável com vários valores possíveis**. Deixa o código mais limpo e legível.
+
+```dart
+void main() {
+  int dia = 3;
+
+  switch (dia) {
+    case 1:
+      print('Domingo');
+      break;
+    case 2:
+      print('Segunda-feira');
+      break;
+    case 3:
+      print('Terça-feira');
+      break;
+    default:
+      print('Dia inválido');
+  }
+}
+```
+
+**Pontos importantes:**
+- `case`: cada valor possível que você quer testar.
+- `default`: executa se nenhum `case` combinar (equivale ao `else`).
+- Nas versões mais antigas do Dart, o `break` era obrigatório para encerrar cada caso. No **Dart 3+**, ele é opcional, pois o `switch` não "cai" para o próximo caso automaticamente.
+- Para agrupar casos com o mesmo resultado:
+
+```dart
+switch (dia) {
+  case 1:
+  case 7:
+    print('Fim de semana');
+  case 2:
+  case 3:
+  case 4:
+  case 5:
+  case 6:
+    print('Dia útil');
+}
+```
+
+**Switch como expressão (Dart 3+):** ele pode devolver um valor diretamente.
+
+```dart
+String nomeDoDia = switch (dia) {
+  1 => 'Domingo',
+  2 => 'Segunda-feira',
+  3 => 'Terça-feira',
+  _ => 'Dia inválido', // o "_" funciona como o default
+};
+```
+
+**Quando usar cada um?**
+- `if/else`: condições com intervalos, comparações complexas (`nota >= 7 && faltas < 10`).
+- `switch`: comparar um valor exato com várias opções (menus, dias da semana, status, etc.).
+
+---
+
+3. Tratamento de exceções: `try`, `catch`, `finally`
+
+Uma **exceção** é um erro que acontece **durante a execução** do programa (por exemplo, converter texto em número, acessar um arquivo que não existe, perder a conexão com a internet). Se ela não for tratada, o programa **quebra**. O `try/catch` permite lidar com o problema de forma controlada.
+
+As três partes
+
+- **`try`** ("tentar"): o código que **pode gerar um erro** fica aqui dentro. O Dart tenta executá-lo normalmente.
+- **`catch`** ("capturar"): se ocorrer uma exceção dentro do `try`, a execução **pula imediatamente** para o `catch`. Ali você decide o que fazer: avisar o usuário, registrar o erro, usar um valor padrão etc.
+- **`finally`** ("finalmente"): um bloco que **sempre é executado**, tenha ocorrido erro ou não. É ideal para "limpeza", como fechar conexões, arquivos ou esconder um indicador de carregamento.
+
+Analisando o seu exemplo
+
+```dart
+void main() {
+  try {
     int numero = int.parse('abc');
   } catch (erro) {
-     print('Erro ao converter o número');
+    print('Erro ao converter o número');
   } finally {
-     print('Operação finalizada');
- }
+    print('Operação finalizada');
+  }
 }
+```
+
+**Passo a passo:**
+1. O Dart entra no `try` e tenta executar `int.parse('abc')`.
+2. `'abc'` não é um número válido, então o `int.parse` lança uma `FormatException`.
+3. O restante do `try` é abandonado e o fluxo vai para o `catch`, que imprime `Erro ao converter o número`.
+4. O `finally` executa e imprime `Operação finalizada`.
+
+**Saída:**
+```
+Erro ao converter o número
+Operação finalizada
+```
+
+Se o texto fosse válido (`int.parse('123')`), o `catch` seria pulado, mas o `finally` ainda executaria.
+
+---
+
+4. Indo além: recursos importantes do `catch`
+
+Ver os detalhes do erro
+O parâmetro do `catch` guarda a exceção. Você pode imprimi-la:
+
+```dart
+try {
+  int numero = int.parse('abc');
+} catch (erro) {
+  print('Erro: $erro');
+}
+// Erro: FormatException: Invalid radix-10 number (at character 1)
+```
+
+Capturar um tipo específico com `on`
+Você pode tratar cada tipo de erro de forma diferente:
+
+```dart
+try {
+  int numero = int.parse('abc');
+  print(10 ~/ 0); // divisão inteira por zero
+} on FormatException {
+  print('O texto não é um número válido');
+} on UnsupportedError {
+  print('Operação não suportada');
+} catch (erro) {
+  print('Erro inesperado: $erro'); // captura qualquer outro erro
+}
+```
+
+Também é possível combinar `on` com `catch` para acessar o erro:
+
+```dart
+on FormatException catch (erro) {
+  print('Formato inválido: ${erro.message}');
+}
+```
+
+Capturar o stack trace
+O segundo parâmetro do `catch` mostra **onde** o erro ocorreu, útil para depurar:
+
+```dart
+catch (erro, stackTrace) {
+  print('Erro: $erro');
+  print('Local: $stackTrace');
+}
+```
+
+Lançar seus próprios erros com `throw`
+
+```dart
+void sacar(double saldo, double valor) {
+  if (valor > saldo) {
+    throw Exception('Saldo insuficiente');
+  }
+  print('Saque realizado');
+}
+
+void main() {
+  try {
+    sacar(100, 200);
+  } catch (erro) {
+    print(erro); // Exception: Saldo insuficiente
+  }
+}
+```
+
+Repassar o erro com `rethrow`
+Se você quer registrar o erro, mas deixar que outra parte do código também o trate:
+
+```dart
+try {
+  // código arriscado
+} catch (erro) {
+  print('Registrando erro...');
+  rethrow;
+}
+```
+
+---
+
+5. Exemplo prático juntando tudo
+
+```dart
+void main() {
+  String entrada = '15';
+
+  try {
+    int numero = int.parse(entrada);
+
+    if (numero > 10) {
+      print('$numero é maior que 10');
+    } else {
+      print('$numero é menor ou igual a 10');
+    }
+  } on FormatException {
+    print('Digite apenas números!');
+  } finally {
+    print('Operação finalizada');
+  }
+}
+```
+
+Troque `entrada` por `'abc'` e veja a diferença no resultado.
+
+---
+
+* Resumo rápido
+
+| Estrutura | Função |
+|---|---|
+| `if / else if / else` | Decide qual bloco executar com base em condições |
+| `switch` | Compara um valor com vários casos possíveis |
+| `try` | Contém o código que pode falhar |
+| `catch` | Trata o erro quando ele acontece |
+| `on` | Captura um tipo específico de exceção |
+| `finally` | Executa sempre, com ou sem erro |
+| `throw` | Lança uma exceção manualmente |
+| `rethrow` | Repassa a exceção capturada |
