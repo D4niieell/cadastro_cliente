@@ -1,49 +1,104 @@
-import 'usuario.dart'; // Import Classe Usuario  // Importa o arquivo que contém a classe Usuario, usada na validação
+// validador_usuario.dart
 
-// Classe responsável pelas validações do usuário  // Comentário original: descreve o propósito da classe
+import 'usuario.dart'; // Import Classe Usuario
+
+// Classe responsável pelas validações do usuário
 class ValidadorUsario {
-  // Declara a classe ValidadorUsario, que agrupa os métodos de validação
-  // Valida o nome do usuário  // Comentário original: descreve o método abaixo
+  // Valida o nome do usuário
   static bool validarNome(String nome) {
-    // Método estático (não precisa instanciar a classe) que recebe um nome e retorna true ou false
-    // Remover os espaços e verificar o tamanho  // Comentário original: explica a lógica do retorno
-    return nome.trim().length >= 3; // trim() remove espaços das pontas; retorna true se o nome tiver 3 ou mais caracteres
-  } // Fim do método validarNome
+    // Remover os espaços  do início e do final.
+    String nomeTratado = nome.trim();
 
-  // Valida o formato do e-mail  // Comentário original: descreve o método abaixo
+    // Verifica se o nome possui o tamanho entre 3 e 60
+    return nomeTratado.length >= 3 && nomeTratado.length <= 60;
+  }
+
+  // Verifica de o nome possui números
+  static bool contemNumeros(String nome) {
+    // Define um padrão que identifica números de 0 a 9.
+    RegExp regra = RegExp(r'[0-9]');
+
+    // Retorna true caso encontre algum número.
+    return regra.hasMatch(nome);
+  }
+
+  // Verifica se o nome possui somente caracteres permitidos.
+  // Permitir letras maiúsculas, minúsculas e acentuadas.
+  // Permitir espaços entre as palavras.
+  static bool validaCaracteresNome(String nome) {
+    // Permite letras maiúsculas e minúsculas
+    // letras acentuadas e espaços.
+    RegExp regra = RegExp(r'^[a-zA-ZÀ-ÿ]+( [a-zA-ZÀ-ÿ]+)*$');
+
+    // Verifica se o nome corresponde ao padrão
+    return regra.hasMatch(nome.trim());
+  }
+
+  // Verifica se o usuário informou pelo menos dois nomes
+  static bool validaNomeCompleto(String nome) {
+    // Remove os espaços do início e do final
+    String nomeTratado = nome.trim();
+
+    // Verifica se existe um espaço entre as palavras
+    return nomeTratado.contains(' ');
+  }
+
+  // Valida o formato do e-mail
   static bool validaEmail(String email) {
-    // Método estático que recebe um e-mail e retorna true se o formato for válido
-    // Define o padrão de e-mail  // Comentário original: explica a linha seguinte
-    RegExp regra = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$'); // Cria uma expressão regular: texto sem @ nem espaços + "@" + texto sem @ nem espaços + "." + texto sem @ nem espaços
+    // Define o padrão de e-mail
+    RegExp regra = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 
-    return regra.hasMatch(email.trim()); // Remove espaços das pontas do e-mail e verifica se ele corresponde ao padrão definido
-  } // Fim do método validaEmail
+    return regra.hasMatch(email.trim());
+  }
 
-  // Valida o OD do usuário.  // Comentário original: descreve o método abaixo (OD = ID)
+  // Valida o OD do usuário.
   static bool validaId(int? id) {
-    // Método estático que recebe um ID (inteiro que pode ser nulo, por causa do "?") e retorna true ou false
-    // o ID deve existir e ser maior que zero.  // Comentário original: explica a regra de validação
-    return id != null &&
-        id >
-            0; // Retorna true somente se o ID não for nulo E for maior que zero
-  } // Fim do método validaId
+    // o ID deve existir e ser maior que zero.
+    return id != null && id > 0;
+  }
 
-  // Valida os dados de um objeto Usuario  // Comentário original: descreve o método abaixo
+  // Valida os dados de um objeto Usuario
   static String? validaUsuario(Usuario usuario) {
-    // Método estático que recebe um objeto Usuario e retorna uma mensagem de erro (String) ou null se estiver tudo certo
-    // Verifica o nome  // Comentário original: explica o bloco if abaixo
+    // Remove os espaço externo do nome
+    String nome = usuario.nome.trim();
+    String email = usuario.email.trim();
+
+    // Verifica o nome
     if (!validarNome(usuario.nome)) {
-      // Se o nome do usuário NÃO for válido (o "!" inverte o resultado)...
-      return 'O nome deve possuir 3 caracteres!!!'; // ...interrompe o método e retorna a mensagem de erro sobre o nome
-    } // Fim do if que verifica o nome
+      // Verica se o nome possui menos de 3 caracteres
+      if (nome.length < 3) {
+        return 'O nome deve possuir 3 caracteres!!!';
+      }
 
-    // Verifica o e-mail  // Comentário original: explica o bloco if abaixo
+      return 'O nome deve possuir no máximo 60 caracteres!!!';
+    }
+
+    // Verifica se o nome contém números
+    if (contemNumeros(nome)) {
+      return 'O nome não pode conter números';
+    }
+
+    // Verifica se o nome contém caractestes inválidos
+    if (!validaCaracteresNome(nome)) {
+      return ('O nome contém caracteres inválidos!!!');
+    }
+
+    // Verifica se foi informado o nome completo
+    if (!validaNomeCompleto(nome)) {
+      return 'Informe o nome completo!!!';
+    }
+
+    // Verifica se o e-mail tem mais de 100 caracteres
+    if (email.length > 100) {
+      return 'O e-mail deve possuir no máximo 100 caracteres!!!';
+    }
+
+    // Verifica o e-mail
     if (!validaEmail(usuario.email)) {
-      // Se o e-mail do usuário NÃO for válido...
-      return 'Informe um e-mail válido!!!'; // ...interrompe o método e retorna a mensagem de erro sobre o e-mail
-    } // Fim do if que verifica o e-mail
+      return 'Informe um e-mail válido!!!';
+    }
 
-    // Retorna null quando não existirem erros  // Comentário original: explica o retorno abaixo
-    return null; // Se passou por todas as validações, retorna null indicando que não há erros
-  } // Fim do método validaUsuario
-} // Fim da classe ValidadorUsario
+    // Retorna null quando não existirem erros
+    return null;
+  }
+}

@@ -1,3 +1,5 @@
+// exemplo.dart
+
 // Função principal: ponto de entrada de todo programa Dart
 void main() {
   // Cria uma String com espaços em branco no início e no fim

@@ -1,3 +1,5 @@
+// usuario.dart
+
 // Declara a classe Usuario, que representa um usuário do sistema
 class Usuario {
   // Declara o atributo id, que aceita valor nulo (int?) por ser gerado pelo banco
