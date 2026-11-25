@@ -1,3 +1,4 @@
+// lib/usuario.dart
 // usuario.dart
 
 // Declara a classe Usuario, que representa um usuário do sistema

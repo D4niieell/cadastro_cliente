@@ -1,3 +1,4 @@
+// lib/exemplo.dart
 // exemplo.dart
 
 // Função principal: ponto de entrada de todo programa Dart
